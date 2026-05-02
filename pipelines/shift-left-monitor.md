@@ -9,7 +9,7 @@ Scheduled, event-driven, or on-demand monitor that cross-references product sour
 | Mode | When it fires | Use case |
 |---|---|---|
 | **Scheduled** | 8am and 12pm weekdays (cron) | Routine coverage — catches overnight and morning merges |
-| **Event-driven** | On merge to main / deploy event | Closes the gap between cron windows — fires the moment a change lands |
+| **Event-driven** | On merge to main / deploy event | Closes the gap between cron windows — commit context is passed directly, no separate lookup needed |
 | **Manual** | `python -m monitor run` | On-demand triage when a CI failure is already in progress |
 
 All three modes produce the same report format and write to the same `impact-reports/` directory.
@@ -24,7 +24,9 @@ flowchart TD
     C -- No --> D([Write up-to-date\none-liner report])
 
     C -- Yes --> E[Pull and capture diff\nrecord old..new SHA]
-    E --> F[Extract changed identifiers\nclasses, methods, API commands, fields]
+    E --> E2[Read commit metadata\nauthor, message, branch name]
+    E2 --> E3[Resolve Jira ticket\nfrom branch naming convention]
+    E3 --> F[Extract changed identifiers\nclasses, methods, API commands, fields]
     F --> G[Cross-reference\ntest-repo tests/ and utils/]
 
     G --> H{Overlap\nfound?}
@@ -51,6 +53,28 @@ flowchart TD
 | **High** | Overlap in a base class, shared utility, or core API command — blast radius extends beyond named tests, multiple specs at risk |
 
 Risk level is determined by the depth and breadth of the overlap. A single changed method referenced in one spec is Low. A changed base class used across dozens of tests is High.
+
+## Report Header
+
+Every report opens with a standard context block populated from commit metadata and branch resolution. This is what makes the report immediately actionable without manual lookup:
+
+```markdown
+## Run Context
+| Field        | Value                          |
+|---|---|
+| Commit       | abc1234                        |
+| Author       | @developer-name                |
+| Message      | "feat: update payment handler" |
+| Jira Ticket  | PROJ-123                       |
+| Branch       | feature/PROJ-123-payment-fix   |
+| Diff Range   | abc1234..def5678               |
+| Report Time  | 2026-05-02 08:00               |
+| Risk Level   | Medium                         |
+```
+
+The Jira ticket is resolved automatically from the branch naming convention visible in the multi-root workspace. No manual input required.
+
+---
 
 ## Required Report Sections
 
