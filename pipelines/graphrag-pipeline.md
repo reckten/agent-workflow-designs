@@ -1,5 +1,7 @@
 # Product GraphRAG
 
+> **What this solves:** Product documentation is siloed, unstructured, and slow to query. This pipeline ingests raw markdown docs, extracts domain entities and relationships via LLM, and builds a traversable knowledge graph with hybrid semantic + graph retrieval. The exported context feeds directly into Claude Code as structured domain knowledge — closing the loop between documentation and test automation.
+
 Knowledge Graph + Semantic Search over product documentation. Extracts domain entities and relationships from 49 markdown docs, builds a traversable graph, and provides hybrid retrieval for natural language queries and Claude Code context generation.
 
 ## Architecture
@@ -8,7 +10,7 @@ Knowledge Graph + Semantic Search over product documentation. Extracts domain en
 Raw .md files (mixed UTF-8/UTF-16LE)
   -> [normalize] -> data/normalized/     (all UTF-8, cleaned)
   -> [chunk]     -> data/chunks.json     (~478 chunks, 800 tokens each)
-  -> [extract]   -> data/entities.json   (LLM entity extraction via Gemma 4 31B)
+  -> [extract]   -> data/entities.json   (LLM entity extraction)
   -> [build]     -> data/graph.json      (NetworkX node-link format)
   -> [embed]     -> data/faiss.index     (local sentence-transformers)
   -> [query]     <- hybrid retrieval: FAISS similarity + graph neighborhood + LLM synthesis
@@ -21,8 +23,7 @@ Raw .md files (mixed UTF-8/UTF-16LE)
 ### Prerequisites
 
 - Python 3.12+
-- An OpenRouter API key (free at [openrouter.ai](https://openrouter.ai))
-- A Google AI Studio key (free at [ai.google.dev](https://ai.google.dev)) added to OpenRouter under Settings > Integrations for higher rate limits
+- Any OpenAI-compatible API endpoint (OpenRouter recommended — free tier available at [openrouter.ai](https://openrouter.ai))
 
 ### Install
 
@@ -33,11 +34,11 @@ pip install -r requirements.txt
 
 ### Configure
 
-Edit `.env` in the project root:
+Edit `.env` in the project root. The pipeline is model-agnostic — swap in any OpenAI-compatible model:
 
 ```env
-OPENROUTER_API_KEY=sk-or-v1-your-key-here
-OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+API_KEY=your-api-key-here
+API_BASE_URL=https://openrouter.ai/api/v1
 EXTRACTION_MODEL=google/gemma-4-31b-it:free
 QUERY_MODEL=google/gemma-4-31b-it:free
 EMBEDDING_MODEL=all-MiniLM-L6-v2
@@ -69,10 +70,10 @@ Extraction is resumable — if interrupted, re-run `python -m graphrag extract` 
 
 ```bash
 # Hybrid query (semantic search + graph traversal + LLM synthesis)
-python -m graphrag query "How are installment plans configured?"
+python -m graphrag query "How are user roles configured?"
 
 # Semantic search only (embeddings, no graph)
-python -m graphrag query "How to process cash payment at POS?" --mode semantic
+python -m graphrag query "How to process a refund?" --mode semantic
 
 # Graph traversal only (entity relationships, no embeddings)
 python -m graphrag query "What entities relate to Payment Methods?" --mode graph
@@ -123,7 +124,7 @@ python -m graphrag export-module ModuleA
 python -m graphrag export-module ModuleB
 
 # Single entity context
-python -m graphrag export-entity "Installment Plan"
+python -m graphrag export-entity "Payment Method"
 ```
 
 The exported `output/PRODUCT_DOMAIN.md` can be referenced by Claude Code as domain context when writing tests.
@@ -132,15 +133,15 @@ The exported `output/PRODUCT_DOMAIN.md` can be referenced by Claude Code as doma
 
 | Type | Description |
 |------|-------------|
-| ProductType | Tickets, passes, admissions |
-| ProductFamily | Groupings of product types |
+| ProductType | Purchasable items and product variants |
+| ProductFamily | Groupings of related product types |
 | Event / Performance | Events and their scheduled instances |
-| PaymentMethod | Cash, Credit Card, Wallet, Credit, Foreign Currency, etc. |
+| PaymentMethod | Supported payment methods and tender types |
 | InstallmentPlan / Contract | Recurring payment plans and agreements |
-| Promotion | Coupon, Manual, Membership, Optional promos |
-| SecurityRole / SecurityRight | Roles and permissions |
-| Workstation / Location | POS workstations and topology |
-| Organization / Person | B2B orgs and individual accounts |
+| Promotion | Discount and promotional configurations |
+| SecurityRole / SecurityRight | Roles and permission assignments |
+| Workstation / Location | Terminal and location topology |
+| Organization / Person | Account holders and organizational entities |
 | ConfigParam | System configuration parameters |
 | Workflow | Multi-step business processes |
 
@@ -183,7 +184,7 @@ Product Docs/
 
 | Component | Technology |
 |-----------|-----------|
-| LLM (extraction + query) | Gemma 4 31B via OpenRouter (free) |
+| LLM (extraction + query) | Configurable via ENV — Gemma 4 31B via OpenRouter used in production (entity extraction is a structured task well-suited to smaller, faster models) |
 | Embeddings | sentence-transformers all-MiniLM-L6-v2 (local, 384-dim) |
 | Vector search | FAISS (cosine similarity) |
 | Knowledge graph | NetworkX (directed graph, JSON serialized) |
