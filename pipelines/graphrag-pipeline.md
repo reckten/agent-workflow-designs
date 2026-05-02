@@ -1,8 +1,8 @@
 # Product GraphRAG
 
-> **What this solves:** Product documentation is siloed, unstructured, and slow to query. This pipeline ingests raw markdown docs, extracts domain entities and relationships via LLM, and builds a traversable knowledge graph with hybrid semantic + graph retrieval. The exported context feeds directly into Claude Code as structured domain knowledge — closing the loop between documentation and test automation.
+> **What this solves:** Product documentation is siloed, unstructured, and slow to query. This pipeline ingests raw markdown docs, extracts domain entities and relationships via LLM, and builds a traversable knowledge graph with hybrid semantic + graph retrieval. The exported context feeds directly into Claude Code as structured domain knowledge — closing the loop between documentation and agents.
 
-Knowledge Graph + Semantic Search over product documentation. Extracts domain entities and relationships from 49 markdown docs, builds a traversable graph, and provides hybrid retrieval for natural language queries and Claude Code context generation.
+Knowledge Graph + Semantic Search over product documentation. Extracts domain entities and relationships from markdown docs, builds a traversable graph, and provides hybrid retrieval for natural language queries and Claude Code context generation.
 
 ## Architecture
 
@@ -127,7 +127,7 @@ python -m graphrag export-module ModuleB
 python -m graphrag export-entity "Payment Method"
 ```
 
-The exported `output/PRODUCT_DOMAIN.md` can be referenced by Claude Code as domain context when writing tests.
+The exported `output/PRODUCT_DOMAIN.md` can be referenced by Claude Code as domain context for any agent workflow operating over the product domain.
 
 ## Entity Types
 
