@@ -8,7 +8,7 @@ Scheduled, event-driven, or on-demand monitor that cross-references product sour
 
 | Mode | When it fires | Use case |
 |---|---|---|
-| **Scheduled** | 8am and 12pm weekdays (cron) | Routine coverage — catches overnight and morning merges |
+| **Scheduled** | Configurable cron expression | Routine coverage — catches overnight and morning merges |
 | **Event-driven** | On merge to main / deploy event | Closes the gap between cron windows — commit context is passed directly, no separate lookup needed |
 | **Manual** | `python -m monitor run` | On-demand triage when a CI failure is already in progress |
 
@@ -18,7 +18,7 @@ All three modes produce the same report format and write to the same `impact-rep
 
 ```mermaid
 flowchart TD
-    A([Trigger\nScheduled, Event-driven, or Manual]) --> B[Fetch Product origin/main]
+    A([Trigger\nScheduled / Event-driven / Manual]) --> B[Fetch Product origin/main]
     B --> C{New commits?}
 
     C -- No --> D([Write up-to-date\none-liner report])
