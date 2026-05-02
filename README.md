@@ -10,6 +10,7 @@ These artifacts represent real systems built to automate complex engineering tas
 |---|---|---|
 | [`skills/source-driven-pom-agent.md`](skills/source-driven-pom-agent.md) | Claude Skill | 8-phase agent that scaffolds Playwright page objects directly from application source code. Reduces per-page POM scaffolding from 2-3 days to under an hour. |
 | [`pipelines/graphrag-pipeline.md`](pipelines/graphrag-pipeline.md) | Pipeline | GraphRAG system that extracts domain entities from product documentation, builds a traversable knowledge graph, and exports Claude-consumable context via hybrid semantic + graph retrieval. |
+| [`pipelines/shift-left-monitor.md`](pipelines/shift-left-monitor.md) | Monitor | Scheduled, event-driven, and on-demand monitor that cross-references product source changes against the test suite, scores risk level, and produces structured impact reports before CI failures surface. |
 
 ## About
 
