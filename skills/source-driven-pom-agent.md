@@ -58,28 +58,28 @@ then encoding them into well-structured page objects.
 flowchart TD
     START([User Request]) --> REC
 
-    subgraph REC["Phase 1 — Reconnaissance"]
-        P1A["1a · Read test repo\nInventory existing POM or learn patterns"]
-        --> P1B["1b · Read app source\nComponents · routes · types · API layer"]
-        --> P1C["1c · Load best practice rules\nCompanion skill: locators + POM patterns"]
+    subgraph REC["Phase 1: Reconnaissance"]
+        P1A["1a: Read test repo - inventory existing POM or learn patterns"]
+        --> P1B["1b: Read app source - components, routes, types, API layer"]
+        --> P1C["1c: Load best practice rules via companion skill"]
     end
 
-    REC --> P2["Phase 2 — Construction\nBuild POM in a single informed pass"]
-    P2  --> P3["Phase 3 — Self-Audit\nValidate against locator priority ladder"]
-    P3  --> P4["Phase 4 — Companion TestID File\nDocument selectors needing data-testid"]
-    P4  --> P5["Phase 5 — Smoke Tests\nOne test per new method · @pom-validation tag"]
-    P5  --> P6{Specs requested?}
+    REC --> P2["Phase 2: Construction - build POM in a single informed pass"]
+    P2 --> P3["Phase 3: Self-Audit - validate against locator priority ladder"]
+    P3 --> P4["Phase 4: Companion TestID File - document selectors needing data-testid"]
+    P4 --> P5["Phase 5: Smoke Tests - one test per new method"]
+    P5 --> P6{Specs requested?}
 
-    P6 -->|Yes| P6A["Phase 6 — Test Spec Creation\nPage objects only · no raw selectors"]
-    P6 -->|No|  P7
+    P6 -->|Yes| P6A["Phase 6: Test Spec Creation - page objects only, no raw selectors"]
+    P6 -->|No| P7
 
-    P6A --> P7["Phase 7 — Final Validation\nFull suite · traces · HTML report"]
-    P7  --> P8{Log to Jira?}
+    P6A --> P7["Phase 7: Final Validation - full suite, traces, HTML report"]
+    P7 --> P8{Log to Jira?}
 
-    P8 -->|Yes| P8A["Phase 8 — Jira Handoff\nUpdate ticket · attach run summary + testid audit"]
-    P8 -->|No|  END
+    P8 -->|Yes| P8A["Phase 8: Jira Handoff - update ticket, attach run summary and testid audit"]
+    P8 -->|No| DONE
 
-    P8A --> END(["✓ Deliverables\nPOM file · TestID audit · Smoke tests"])
+    P8A --> DONE(["Deliverables: POM file, TestID audit, Smoke tests"])
 ```
 
 ---
