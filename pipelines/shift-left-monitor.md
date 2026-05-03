@@ -12,7 +12,7 @@ Scheduled, event-driven, or on-demand monitor that cross-references product sour
 | **Event-driven** | On merge to main / deploy event | Closes the gap between cron windows — commit context is passed directly, no separate lookup needed |
 | **Manual** | `python -m monitor run` | On-demand triage when a CI failure is already in progress |
 
-All three modes produce the same report format and write to the same `impact-reports/` directory.
+All three modes produce the same report format and write to the same output directory, configurable via `.env`.
 
 ## Pipeline
 
@@ -34,7 +34,7 @@ flowchart TD
     H -- No --> I([Write report\nRisk: None\nTests Confirmed Safe])
     H -- Yes --> J([Write report\nRisk: Low / Medium / High\nNamed tests + grep commands])
 
-    J --> K[[impact-reports/\nYYYY-MM-DD-HHmm.md]]
+    J --> K[[{output-dir}/\nYYYY-MM-DD-HHmm.md]]
     I --> K
     D --> K
 
@@ -97,4 +97,4 @@ Badge UI test entries with a `UI` type label distinct from `API`.
 ---
 
 ## Reports
-Timestamped reports accumulate in `impact-reports/`. Each run produces one file — check the timestamp closest to when a failure appeared in the pipeline.
+Timestamped reports accumulate in the configured output directory. Each run produces one file — check the timestamp closest to when a failure appeared in the pipeline.
