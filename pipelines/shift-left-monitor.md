@@ -34,7 +34,7 @@ flowchart TD
     H -- No --> I([Write report\nRisk: None\nTests Confirmed Safe])
     H -- Yes --> J([Write report\nRisk: Low / Medium / High\nNamed tests + grep commands])
 
-    J --> K[[{output-dir}/\nYYYY-MM-DD-HHmm.md]]
+    J --> K[[output-dir/\nYYYY-MM-DD-HHmm.md]]
     I --> K
     D --> K
 
