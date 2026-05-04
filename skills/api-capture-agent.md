@@ -9,11 +9,14 @@ description: >
   validate, and handoff pipeline.
 
   Use this skill when the user wants to capture an API call for a
-  specific page and action, validate it against backend source, or
-  produce a clean payload ready for the api-generator-agent.
+  specific page and action, validate it against backend source,
+  produce a clean payload ready for the api-generator-agent, or
+  export validated requests to a shared Postman workspace for team
+  reusability.
 
   This skill does NOT generate functions, generate tests, stage or
-  merge code, maintain mapping indexes, or prompt for Postman.
+  merge code, or maintain mapping indexes. Postman export is
+  available on request — not suggested automatically.
 ---
 
 # API Capture Agent
@@ -306,9 +309,29 @@ Example structure:
 ````
 `````
 
+### Postman Export (Optional)
+
+After the user confirms the validated payload, offer to export it to a shared Postman workspace for team reusability. This is a parallel output path — the same validated payload that feeds the `api-generator-agent` can also be pushed to Postman so the team has a shared reference for manual verification, exploratory testing, and onboarding.
+
+**Do not suggest this unprompted.** Export only when the user requests it.
+
+Two integration paths — use whichever is available in the current environment:
+
+| Path | When to use |
+|---|---|
+| **Postman MCP** | Preferred when the MCP server is configured — allows the agent to create or update collections directly in the workspace without leaving the session |
+| **VS Code Postman Extension** | Use when MCP is not available — export the validated payload as a collection JSON the user can import via the extension |
+
+When exporting, create or update a collection entry with:
+- Request name matching the `Command` value
+- Endpoint, method, and headers
+- Pre-populated request body from the validated payload
+- Response schema from the validated capture
+- A description noting the source file (`DOCmd_*.java`) for traceability
+
 ### Cleanup
 
-Delete `capture.har` **only after the user confirms the handoff is complete.** Do not delete preemptively.
+Delete `capture.har` **only after the user confirms the handoff is complete and any Postman export is done.** Do not delete preemptively.
 
 ```bash
 rm -f capture.har
