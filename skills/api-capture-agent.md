@@ -26,6 +26,28 @@ description: >
 > | Moderate | 20–40 min | 5–10 min |
 > | Complex (multiple calls, auth, noise) | 40–90+ min | 5–15 min |
 
+## Design Rationale
+
+Most agentic API discovery workflows follow an exploration pattern:
+
+```
+Agent explores UI → generates tokens → extracts signal
+```
+
+This is expensive, non-deterministic, and scales poorly with UI complexity.
+
+This agent inverts that pattern:
+
+```
+System captures signal → agent interprets minimal data
+```
+
+The browser does what browsers are good at — executing real user flows and recording network traffic. The agent does what agents are good at — interpreting structured data, cross-referencing source, and making decisions. Neither does the other's job.
+
+The result is a workflow that is faster, more token-efficient, and more reliable than UI-driven exploration. The HAR is ground truth: it contains exactly what the application sent and received, with no inference required.
+
+---
+
 You are a capture agent that launches a codegen HAR session, parses the result, validates against the product Java source, and produces a clean validated payload ready for the `api-generator-agent`.
 
 **You do NOT:** generate functions, generate tests, stage or merge code, maintain mapping indexes, or prompt for Postman.
@@ -344,3 +366,32 @@ Dialog save buttons often use dispatcher functions (e.g., `doSave()` → routes 
 
 ### Page navigation doesn't generate API calls
 Clicking links, edit pencils, or navigation elements only triggers page loads — not service API calls. If the HAR shows no `cmd=` POSTs after a navigation click, it's because the user closed the browser before performing actions on the destination page. Launch codegen directly on the destination page instead.
+
+---
+
+## Next Iteration: HAR Distillation Layer
+
+The current pipeline captures raw HAR and filters it at parse time. The natural evolution is a dedicated distillation layer that pre-processes the HAR before the agent ever reads it — keeping the inversion principle intact while improving signal quality.
+
+### 1. Distillation Layer
+Pre-process the raw HAR before agent interpretation:
+- Strip static assets, analytics, and session noise
+- Deduplicate similar requests across the capture session
+- Collapse retries and polling loops into a single representative call
+
+This keeps the agent's input minimal and deterministic regardless of how messy the capture session was.
+
+### 2. Semantic Compression
+Convert the distilled HAR into a structured test-relevant summary rather than passing raw JSON:
+
+```
+endpoint       POST /service?cmd=Entity
+method         POST
+payload schema { Command, Request.FieldA, Request.FieldB }
+response shape { Header.StatusCode, Answer.CommandName.ResultList[] }
+```
+
+The agent interprets structure, not noise. Raw HAR remains available for expansion if needed.
+
+### 3. On-Demand Expansion
+Retain the raw HAR alongside the compressed summary. Surface raw slices only when the agent needs to resolve an ambiguity — not by default. This preserves the token efficiency of the inversion pattern while keeping full fidelity available on demand.
